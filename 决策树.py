@@ -1,4 +1,5 @@
 #计算香农熵
+import time
 import numpy as np
 def calEnt(dateset):
     n=dateset.shape[0];#总行数
@@ -66,18 +67,19 @@ def createTree(dataset):
     return mytree;#返回已经建好的树
 #bestSplite(dataset);
 mytree=createTree(dataset)
-# print(mytree)
-#决策树的保存
-# np.save('myTree.npy',mytree);
-# #将建好的树保存为myTree.npy格式，为了节省时间，建好后的树立马将其保存
-# #后续使用直接调用即可
-# #打开树,直接调用load()函数即可
-# read_mytree=np.load('myTree.npy').item()
-# #print(read_mytree)
+print(mytree)
+#决策树的保存，
+np.save('myTree.npy',mytree);
+#将建好的树保存为myTree.npy格式，为了节省时间，建好后的树立马将其保存
+#后续使用直接调用即可
+#打开树,直接调用load()函数即可
+#read_mytree=np.load('myTree.npy').item()
+#print(read_mytree)
 # #建立分类的函数验证决策树
 #iniputtree：已经生成的决策树
 #lables:存储选择的最优特征的标签
 #testcv:测试数据列表，顺序对应原数据集
+#classfily为对一条数据集的预测函数
 def classify(inputTree,lables,testcv):
     firstStr=next(iter(inputTree))#获得第一个节点
     seconDict=inputTree[firstStr]#获取到下一个字典
@@ -85,12 +87,13 @@ def classify(inputTree,lables,testcv):
     for key in seconDict.keys():
         if testcv[feateIndex]==key:
             if type(seconDict[key])==dict:
+                #递归划分
                 classLabel=classify(seconDict[key],lables,testcv);
             else:
                 classLabel=seconDict[key];
     return classLabel;
 
-#测试准确率的函数
+#测试准确率的函数，根据训练集生成了一棵树
 def acc_classfiy(train,test):
     inputTree=createTree(train);#根据训练集生成一个树
     lables=list(train.columns)#对数据集的列名称
@@ -100,12 +103,19 @@ def acc_classfiy(train,test):
         classLable=classify(inputTree,lables,testvc);
         result.append(classLable);
     test['predict']=result;
+    #计算准确率,-2为倒数第二列
     acc=(test.iloc[:,-1]==test.iloc[:,-2]).mean();
+    #打印出准确率
     print(f"模型的准确率为{acc}")
     return test;
 train=dataset;
+#假设测试集用dataset的前三个
+#测试集从训练集中选出来的
+#测试集用前三个
 test=dataset.iloc[:3,:];
 acc_classfiy(train,test);
+# print(test)
+# print(train)
 
 
 
